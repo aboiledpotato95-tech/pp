@@ -1,0 +1,816 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A.I - Ans by Mystery</title>
+<style>
+:root{--bg:#eef1f5;--ink:#141c26;--mut:#5d6b7c;--card:#fff;--line:#d3dae3;--acc:#1f4fd8;--on:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#10151c;--ink:#e8edf3;--mut:#93a1b3;--card:#18202a;--line:#2b3644;--acc:#7da2ff;--on:#0b1220}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0 auto;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,sans-serif;padding:16px;max-width:560px}
+h1{font-size:20px;margin:4px 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.row{display:flex;gap:8px}
+button,.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:12px 14px;border-radius:8px;text-align:center;cursor:pointer}
+.btn{flex:1}
+.pri{background:var(--acc);color:var(--on);border-color:var(--acc);flex:1}
+button:disabled{opacity:.5}
+#th{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.tb{position:relative}
+.tb img{width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:block}
+.rm{position:absolute;top:-8px;right:-8px;width:26px;height:26px;padding:0;border-radius:50%;font-size:13px;line-height:1;background:#111;color:#fff;border:2px solid var(--card)}
+#out,#o_out{font:16px/1.6 ui-monospace,Menlo,monospace;white-space:pre-wrap}
+.it{margin-bottom:10px}.sc{overflow-x:auto;margin:4px 0}
+table{border-collapse:collapse;font:15px system-ui,sans-serif;white-space:normal}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left}th{background:var(--bg)}
+.dg{display:block;max-width:100%;width:340px;background:#fff;border:1px solid var(--line);border-radius:8px;margin:6px 0}
+.fg{display:block;max-width:100%;width:340px;border:1px solid var(--line);border-radius:8px;margin:6px 0}
+.warn{white-space:pre-wrap;color:#b3261e;font:14px system-ui,sans-serif;margin-top:8px}
+.chip{width:130px;min-height:72px;padding:8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);font:12px/1.3 system-ui,sans-serif;word-break:break-word;white-space:normal}
+.mut{color:var(--mut);font-size:13px}
+details input{width:100%;font:inherit;padding:10px;margin:4px 0;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.k{display:flex;gap:8px;align-items:center}.k input{flex:1;min-width:0}.ks{min-height:16px;margin-bottom:8px}
+summary{font-weight:600;cursor:pointer}
+textarea{width:100%;font:inherit;padding:10px;margin-top:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.tabs{display:flex;margin:0 0 12px;border-bottom:1px solid var(--line)}
+.tab{flex:1;border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:12px 8px;font-weight:700;color:var(--mut)}
+.tab.on{color:var(--ink);border-bottom-color:var(--acc)}
+.tab i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:7px;vertical-align:middle}
+.tab.busy i{background:var(--acc);animation:pl 1s infinite}.tab.done i{background:#1e9e5a}
+@keyframes pl{50%{opacity:.25}}
+.bk{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
+.bk>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bk small{color:var(--mut)}
+.bk input{width:20px;height:20px;margin:0}.rm2{padding:4px 10px}
+#crop{position:fixed;inset:0;background:#000;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#cv{touch-action:none;max-width:100%}
+.bar{display:flex;gap:8px;width:min(100%,420px);padding:0 12px}
+</style></head><body>
+<h1>A.I - Ans by Mystery</h1>
+<div class="tabs" role="tablist"><button class="tab on" id="tab_on" role="tab" aria-selected="true">Online<i></i></button><button class="tab" id="tab_off" role="tab" aria-selected="false">Offline<i></i></button></div>
+<section id="pane_on">
+<div class="card">
+  <div class="row"><label class="btn" for="f">Photos / files</label><label class="btn" for="fc">Camera</label><button id="clr">Clear</button></div>
+  <input id="f" type="file" accept="image/*,application/pdf,.pdf,.docx,.doc,.odt,.txt" multiple hidden>
+  <input id="fc" type="file" accept="image/*" capture="environment" hidden>
+  <div id="th"></div><div class="mut" id="cnt" style="margin-top:8px"></div>
+</div>
+<div class="row" style="margin-bottom:12px"><button class="pri" id="go">Get answers</button></div>
+<div class="card" id="res" hidden>
+  <div id="out"></div>
+  <div class="row" style="margin-top:12px;align-items:center"><span class="mut" id="via" style="flex:1"></span><button id="cp">Copy</button></div>
+</div>
+<details class="card"><summary>Free API keys &amp; time limit</summary>
+  <p class="mut">Add one or more. If one hits its limit or fails, the next one is used automatically.</p>
+  <div class="mut">Gemini (aistudio.google.com/apikey)</div>
+  <div class="k"><input type="text" id="k_gemini" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="paste key here"><button class="pb" data-k="gemini">Paste</button></div><div class="mut ks" id="s_gemini"></div>
+  <div class="mut">Groq (console.groq.com/keys)</div>
+  <div class="k"><input type="text" id="k_groq" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="paste key here"><button class="pb" data-k="groq">Paste</button></div><div class="mut ks" id="s_groq"></div>
+  <div class="mut">OpenRouter (openrouter.ai/keys)</div>
+  <div class="k"><input type="text" id="k_or" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="paste key here"><button class="pb" data-k="or">Paste</button></div><div class="mut ks" id="s_or"></div>
+  <div class="mut">Time limit per request (seconds)</div>
+  <div class="k"><input type="text" inputmode="numeric" id="tl" placeholder="85" autocomplete="off"><button id="tlr">Reset</button></div><div class="mut ks" id="s_tl"></div>
+</details>
+</section>
+<section id="pane_off" hidden>
+<div class="card">
+  <div class="row" style="align-items:center"><strong style="flex:1">Books</strong><button id="b_add">Add book</button></div>
+  <input id="bf" type="file" accept=".txt,.docx,.odt,.pdf,text/plain" multiple hidden>
+  <div id="b_list"></div><div class="mut" id="b_msg" style="margin-top:8px">Add your book (PDF, Word or text). It stays saved on this phone until you remove it with ✕. Answers come from your books, with no internet.</div>
+</div>
+<div class="card">
+  <div class="row"><label class="btn" for="of">Photos / files</label><label class="btn" for="ofc">Camera</label><button id="o_clr">Clear</button></div>
+  <input id="of" type="file" accept="image/*,application/pdf,.pdf,.docx,.doc,.odt,.txt" multiple hidden>
+  <input id="ofc" type="file" accept="image/*" capture="environment" hidden>
+  <div id="o_th"></div><div class="mut" id="o_cnt" style="margin-top:8px"></div>
+  <textarea id="o_text" rows="4" placeholder="Or type / paste questions here, for example:&#10;1. Which gas do plants release? (a) Oxygen (b) Hydrogen&#10;2. What is transpiration?"></textarea>
+</div>
+<div class="row" style="margin-bottom:12px"><button class="pri" id="o_go">Get answers (offline)</button></div>
+<div class="card" id="o_res" hidden>
+  <div id="o_out"></div>
+  <div class="row" style="margin-top:12px;align-items:center"><span class="mut" id="o_via" style="flex:1"></span><button id="o_cp">Copy</button></div>
+</div>
+</section>
+<div id="crop" hidden><canvas id="cv"></canvas>
+  <div class="bar"><button id="cx">Cancel</button><button id="cr">Rotate</button><button id="cu" class="pri">Use</button></div></div>
+<script>
+const clean=s=>String(s??'').replace(/\*+|`/g,'').replace(/\s*\n\s*/g,' ').trim();
+function LET(a,strict){
+  a=(Array.isArray(a)?a.join(','):clean(a)).replace(/^\[\s*([a-e])\s*\]/i,'($1)').replace(/^(?:the\s+)?(?:correct\s+)?(?:option|answer|ans|choice)\s*(?:is\s*)?[:\-]?\s*/i,'');
+  const h=a.match(/^\(?[a-e]\)?(?:\s*(?:,|&|\/|\band\b)\s*\(?[a-e]\)?)*/i);
+  if(!h)return'';
+  const r=a.slice(h[0].length);
+  if(!(r===''||/^[.):\-–,;]/.test(r)||(strict?/\)$/.test(h[0]):/^\s/.test(r))))return'';
+  return h[0].replace(/\band\b/gi,'').match(/[a-e]/gi).join(',').toLowerCase();
+}
+const cells=l=>l.replace(/^\s*\||\|\s*$/g,'').split('|').map(clean);
+function mdTable(t){const r=String(t).split('\n').filter(l=>l.includes('|')&&!/^[\s|:\-]+$/.test(l)).map(cells);return r.length>1?r:null}
+function TY(x,a){
+  const t=clean(x.t||x.type||x.question_type).toLowerCase();
+  if(/mcq|multiple|choice|objective|option/.test(t))return'mcq';
+  if(/diagram|draw|sketch|figure|image|picture|label|graph|circuit|flow/.test(t))return'diagram';
+  if(/table|tabular|chart/.test(t)||(!t&&(x.rows||x.table)))return'table';
+  if(/long|step|descr|essay|numer|calc|solv|problem|derive|proof|work/.test(t))return'long';
+  if(t)return'short';
+  return(x.s||x.steps||x.solution||x.working)?'long':(LET(a,true)&&clean(a).length<14?'mcq':'short');
+}
+function norm(x,i){
+  if(!x||typeof x!=='object')x={a:x};
+  let a=x.a??x.answer??x.ans??x.correct_answer??x.correct??x.option??x.choice??x.result??x.final_answer??'';
+  let s=x.s??x.steps??x.solution??x.working;
+  if(typeof s==='string')s=s.split(/\n|;\s*/);
+  s=Array.isArray(s)?s.map(z=>clean(z&&typeof z==='object'?(z.text||z.step||z.content||''):z)).filter(Boolean):[];
+  let rows=x.rows??x.table??x.cells;
+  if(!Array.isArray(rows))rows=null;
+  if(rows&&rows.length&&rows[0]&&typeof rows[0]==='object'&&!Array.isArray(rows[0])){const h=Object.keys(rows[0]);rows=[h,...rows.map(o=>h.map(k=>o[k]))]}
+  if(!rows&&typeof a==='string'&&a.includes('\n')&&a.includes('|')){rows=mdTable(a);if(rows)a=''}
+  rows=rows&&rows.length?rows.map(r=>(Array.isArray(r)?r:[r]).map(clean)):undefined;
+  let t=TY(x,a);
+  let svg=typeof x.svg==='string'?x.svg:(typeof x.diagram==='string'&&/<svg/i.test(x.diagram)?x.diagram:'');
+  if(!svg&&typeof a==='string'&&/<svg[\s\S]*<\/svg>/i.test(a)){svg=a.match(/<svg[\s\S]*<\/svg>/i)[0];a=a.replace(svg,'').trim()}
+  let fig=x.fig||x.figure;
+  if(fig&&typeof fig==='object'){const b=(fig.b||fig.box||fig.bbox||[]).map(Number);fig=b.length===4&&b.every(v=>v>=0&&v<=1000)&&b[2]-b[0]>=30&&b[3]-b[1]>=30?{p:Math.max(1,Math.round(+fig.p||1)),b}:null}else fig=null;
+  if(svg&&t!=='table')t='diagram';
+  if(rows&&t!=='diagram')t='table';
+  if(t==='long'&&!s.length&&typeof a==='string'&&/\n|;|\.\s+[A-Z0-9]/.test(a)){s=a.split(/\n|;\s*|\.\s+(?=[A-Z0-9])/).map(clean).filter(Boolean);a=''}
+  return{n:x.n??x.number??x.no??x.question_number??x.qn??x.id??i+1,t,a:Array.isArray(a)?a.join(','):a,s,rows,svg:svg||undefined,fig};
+}
+function items(d){
+  if(Array.isArray(d))return d;
+  if(!d||typeof d!=='object')return[];
+  for(const k of['q','questions','answers','items','results','data','solutions']){
+    const v=d[k];
+    if(Array.isArray(v)&&v.length)return v;
+    if(v&&typeof v==='object'&&!Array.isArray(v)){const r=items(v);if(r.length)return r}
+  }
+  if(d.a!==undefined||d.answer!==undefined||d.s||d.steps||d.rows||d.svg)return[d];
+  return Object.entries(d).filter(([k])=>/^\D{0,2}\d+/.test(k)).map(([k,v])=>Array.isArray(v)?{n:k,s:v}:v&&typeof v==='object'?{n:k,...v}:{n:k,a:v});
+}
+function lines(t){const q=lines0(t),sv=t.match(/<svg[\s\S]*?<\/svg>/gi)||[];let k=0;q.forEach(x=>{if(x.t==='diagram'&&!x.svg&&sv[k])x.svg=sv[k++]});return q}
+function lines0(t){
+  const q=[],HDR=/^(solution|steps?|working|answer|ans)\s*:?$/i;
+  const N1=/^\s*(?:[*#>•\-]+\s*)*(?:\|\s*)?(?:q(?:uestion)?\.?\s*)?\(?(\d{1,3})\)?\s*\\?(?:[.):]|\|)\s*(.*)$/i;
+  const N2=/^\s*(?:[*•\-]+\s*)*(?:q\.?\s*)?(\d{1,3})\s*[-–=]\s*(.+)$/i;
+  const SEP=/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/;
+  const L=t.replace(/```\w*/g,'').split('\n');
+  for(let i=0;i<L.length;i++){
+    const l=L[i];
+    if(l.includes('|')&&L[i+1]&&SEP.test(L[i+1])){
+      const h=cells(l);
+      if(/^(q\.?|q\.?\s*no\.?|no\.?|s\.?\s*no\.?|sl\.?\s*no\.?|que\.?|question(\s*no\.?)?|#)$/i.test(h[0])&&/ans|option|correct|key|choice/i.test(h[1]||'')){i++;continue}
+      const rows=[h];let j=i+2;
+      for(;j<L.length&&L[j].includes('|');j++)rows.push(cells(L[j]));
+      const p=q[q.length-1];
+      if(p&&p.t!=='mcq'){p.t='table';p.rows=rows}else q.push({n:p?+p.n+1:1,t:'table',rows});
+      i=j-1;continue;
+    }
+    let m=l.match(N1);
+    if(!m){const k=l.match(N2);if(k&&LET(k[2],true))m=k}
+    const last=q[q.length-1];
+    if(m){
+      let b=/^\s*\|/.test(l)?clean(m[2].split('|')[0]):clean(m[2]);
+      if(last&&+m[1]<=+last.n&&!LET(b,true)){
+        if(last.t==='mcq')continue;
+        if(last.a&&last.t==='short'&&!last.s)last.s=[last.a],last.a='';
+        if(b)(last.s=last.s||[]).push(b);
+        if(last.t==='short')last.t='long';continue;
+      }
+      if(HDR.test(b))b='';
+      const dm=b.match(/^\[?(diagram|table)\]?\s*[:\-]?\s*(.*)$/i);
+      if(dm){q.push({n:m[1],t:dm[1].toLowerCase(),a:dm[2]});continue}
+      const c=LET(b,true);
+      q.push(c?{n:m[1],t:'mcq',a:c}:{n:m[1],t:'short',a:b});continue;
+    }
+    const c=clean(l);
+    if(last&&last.t!=='mcq'&&last.t!=='table'&&c&&/^(\s{2,}|\t|\s*[-*•→]|\s*step\b|\s*(?:final|answer|ans|therefore|hence)\b)/i.test(l)){
+      if(last.a&&!last.s&&last.t==='short')last.s=[last.a],last.a='';
+      (last.s=last.s||[]).push(c.replace(/^[-•→]\s*/,''));
+      if(last.t==='short')last.t='long';
+    }
+  }
+  if(q.length<2){
+    const g=[...t.matchAll(/(?:^|[\s,;(])(\d{1,3})\s*[.):\-–=]?\s*\(?([a-e])\)?(?=[\s,;.)]|$)/gi)];
+    if(g.length>=2)return g.map(x=>({n:x[1],t:'mcq',a:x[2].toLowerCase()}));
+  }
+  if(q.length)return q;
+  const one=t.replace(/```\w*/g,'').trim(),s=one.match(/(?:^|\n)\W*(?:answer|ans|correct(?: answer| option)?|option)\s*(?:is)?\s*[:\-]?\s*\(?([a-e])\)?(?=[\s.)]|$)/i);
+  const s2=one.match(/\b(?:the\s+)?(?:correct\s+)?(?:answer|option)\s+is\s*:?\s*\(?([a-e])\)?(?=[\s.)]|$)/i);
+  if(s||s2)return[{n:1,t:'mcq',a:(s||s2)[1].toLowerCase()}];
+  if(/^\(?[a-e]\)?\.?$/i.test(one))return[{n:1,t:'mcq',a:one.replace(/\W/g,'').toLowerCase()}];
+  const f=one.match(/^\W*(?:final\s+)?answer\s*[:\-]\s*(.+)$/im);
+  return f?[{n:1,t:'short',a:clean(f[1])}]:[];
+}
+function esc(s){let o='',q=false,b=false;for(const c of s){if(q){if(b)b=false;else if(c==='\\')b=true;else if(c==='"')q=false;else if(c==='\n'){o+='\\n';continue}else if(c==='\r')continue;else if(c==='\t'){o+='\\t';continue}}else if(c==='"')q=true;o+=c}return o}
+function parse(t){
+  t=String(t||'');
+  const a=t.search(/[\[{]/);
+  if(a>=0){
+    const e=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']')),src=t.slice(a,e+1),fix=s=>s.replace(/,\s*([}\]])/g,'$1');
+    let d;for(const f of[s=>s,fix,s=>fix(esc(s))]){try{d=JSON.parse(f(src));break}catch(_){}}
+    let arr=d!==undefined?items(d):(t.match(/\{[^{}]*\}/g)||[]).map(o=>{try{return JSON.parse(fix(esc(o)))}catch(_){}}).filter(Boolean);
+    if(arr.length&&arr.every(z=>!z||typeof z!=='object')&&!t.replace(/```\w*/g,'').trim().startsWith('['))arr=[];
+    const q=arr.map(norm).filter(x=>clean(x.a)||x.s.length||x.rows||x.svg);
+    if(q.length)return{q};
+  }
+  const q=lines(t);
+  if(q.length)return{q};
+  throw new Error('Unreadable reply');
+}
+function grid(rows){
+  const w=[];rows.forEach(r=>r.forEach((c,i)=>w[i]=Math.max(w[i]||0,c.length)));
+  const f=r=>w.map((x,i)=>(r[i]||'').padEnd(x)).join(' | ').replace(/\s+$/,''),o=rows.map(f);
+  if(rows.length>1)o.splice(1,0,w.map(x=>'-'.repeat(x)).join('-+-'));
+  return o;
+}
+function fmt(d){return d.q.map(x=>{
+  const n=String(x.n).replace(/^\D*?(?=\d)/,'').replace(/[^\w]+$/,'')||'?',a=clean(x.a);
+  const st=(x.s||[]).map(z=>z.replace(/^\s*(?:[-•→]\s*|step\s*\d+\s*[:.)\-]?\s*|\d+[.)]\s+|\d+\)\s*|\(\d+\)\s*)/i,'')).filter(Boolean);
+  if(x.t==='mcq'||(x.t==='short'&&/^\(?[a-e]\)?\.?$/i.test(a))){const l=LET(x.a);return n+'. '+(l?'('+l+')':a||'?')}
+  if(x.t==='table'&&x.rows)return n+'. [table]\n'+grid(x.rows).map(r=>'   '+r).join('\n');
+  if(x.t==='diagram'){const b=[a,...st].filter(Boolean);return(n+'. [diagram] '+(b.shift()||'')).trimEnd()+b.map(z=>'\n   - '+z).join('')}
+  if(st.length&&a&&!st[st.length-1].includes(a))st.push(a);
+  if(st.length>1)return n+'.\n'+st.map((z,i)=>'   '+(i+1)+') '+z).join('\n');
+  return n+'. '+(st[0]||a||'?')}).join('\n')}
+function order(q){
+  const k=x=>{const m=String(x.n).match(/\d+/);return m?+m[0]:1e9};
+  const s=q.map((x,i)=>[x,i]).sort((a,b)=>k(a[0])-k(b[0])||String(a[0].n).localeCompare(String(b[0].n),undefined,{numeric:true})||a[1]-b[1]).map(z=>z[0]);
+  const out=[];let prev='';
+  for(const x of s){const key=fmt({q:[x]})+'\0'+(x.svg||'');if(key!==prev)out.push(x);prev=key}
+  return out;
+}
+const plain=items=>items.map(x=>fmt({q:[x]})).join('\n');
+const finish=q=>plain(order(q));
+function gaps(items){
+  const ns=[...new Set(items.map(x=>{const m=String(x.n).match(/^\D*(\d+)/);return m?+m[1]:null}).filter(v=>v!==null))].sort((a,b)=>a-b),g=[];
+  if(ns.length>1&&ns[ns.length-1]-ns[0]<300)for(let i=ns[0];i<ns[ns.length-1];i++)if(!ns.includes(i))g.push(i);
+  return g.length&&g.length<=12?g:[];
+}
+// ===== Offline engine: a tiny, very fast "local AI" that reads YOUR book (search + reading, no internet, no model download) =====
+const STOP=new Set(('a an the and or of to in on at by for from with as is are was were be been being this that these those it its into than then so such not no nor if but also can could may might shall should will would do does did done has have had which who whom whose what when where why how there their they them he she his her we our you your i me my us about over under between among during before after above below up down out off again further once only own same other more most some any each few both very just following correct incorrect true false statement given option options choose select best answer question').split(' '));
+function stem(w){
+  if(w.length>4){if(/ies$/.test(w))return w.slice(0,-3)+'y';if(/(sses|shes|ches|xes)$/.test(w))return w.slice(0,-2)}
+  if(w.length>4&&/s$/.test(w)&&!/(ss|us|is)$/.test(w))w=w.slice(0,-1);
+  if(w.length>5&&/ing$/.test(w))w=w.slice(0,-3);else if(w.length>4&&/ed$/.test(w))w=w.slice(0,-2);
+  return w}
+function tok(s){return(String(s).toLowerCase().match(/[a-z0-9]+(?:\.[0-9]+)?/g)||[]).filter(w=>!STOP.has(w)&&(w.length>1||/\d/.test(w))).map(stem)}
+function splitSent(t){
+  t=String(t).replace(/\s+/g,' ').trim();if(!t)return[];
+  const m=t.match(/(?:[^.!?]|\.(?=\d))+[.!?]*(?:\s+|$)/g)||[t],out=[];
+  for(let s of m){s=s.trim();if(s.length<3)continue;
+    while(s.length>380){let k=s.lastIndexOf(' ',300);if(k<100)k=300;out.push(s.slice(0,k).trim());s=s.slice(k).trim()}
+    if(s)out.push(s)}
+  return out}
+function chunkPage(text,page){
+  const S=splitSent(text),out=[];let cur=[],len=0,fresh=0;
+  for(const s of S){cur.push(s);fresh++;len+=s.length;
+    if(len>=300){out.push({page,text:cur.join(' ')});cur=cur.slice(-1);len=cur.length?cur[0].length:0;fresh=0}}
+  if(fresh>0&&cur.length)out.push({page,text:cur.join(' ')});
+  return out}
+class BK{
+  constructor(){this.docs=[];this.post=new Map();this.dl=[];this.N=0;this.tot=0}
+  add(text,meta){const id=this.N++,t=tok(text),tf=new Map();for(const w of t)tf.set(w,(tf.get(w)||0)+1);
+    this.docs.push({text,...meta});this.dl.push(t.length||1);this.tot+=t.length||1;
+    tf.forEach((c,w)=>{let p=this.post.get(w);if(!p)this.post.set(w,p=[]);p.push([id,c])});return id}
+  idf(w){const p=this.post.get(w),n=p?p.length:0;return Math.log(1+(this.N-n+.5)/(n+.5))}
+  search(terms,k){const avg=this.tot/Math.max(1,this.N),sc=new Map();
+    for(const w of new Set(terms)){const p=this.post.get(w);if(!p)continue;const i=this.idf(w);
+      for(const[id,c]of p)sc.set(id,(sc.get(id)||0)+i*c*2.2/(c+1.2*(.25+.75*this.dl[id]/avg)))}
+    return[...sc].sort((a,b)=>b[1]-a[1]).slice(0,k||5)}}
+// ---- reading questions out of text (typed, OCR of a photo, a document) ----
+function getOpts(s){
+  s=String(s);const re=/(^|[\s,;:])(\(?)([A-Ea-e])([.)])\s*/g,marks=[];let m;
+  while((m=re.exec(s))){const L=m[3].toLowerCase();if(L==='e'&&m[4]==='.'&&!m[2])continue;
+    marks.push({L,pos:m.index+m[1].length,end:m.index+m[0].length})}
+  let best=null;
+  for(let i=0;i<marks.length;i++){if(marks[i].L!=='a')continue;
+    const ch=[marks[i]];let want='b';
+    for(let j=i+1;j<marks.length;j++)if(marks[j].L===want){ch.push(marks[j]);want=String.fromCharCode(want.charCodeAt(0)+1)}
+    if(ch.length>=2&&(!best||ch.length>=best.length))best=ch}
+  if(!best){ // numbered options (1) (2) (3) (4)
+    const r2=/(^|\s)\(([1-5])\)\s*/g,mk=[];while((m=r2.exec(s)))mk.push({L:'abcde'[+m[2]-1],n:+m[2],pos:m.index+m[1].length,end:m.index+m[0].length});
+    const ch=[];let want=1;for(const x of mk)if(x.n===want){ch.push(x);want++}
+    if(ch.length>=2)best=ch}
+  if(!best)return null;
+  const opts={};best.forEach((x,k)=>{opts[x.L]=s.slice(x.end,k+1<best.length?best[k+1].pos:s.length).trim().replace(/[;,.\s]+$/,'')});
+  return{stem:s.slice(0,best[0].pos).trim(),opts}}
+function splitQs(raw){
+  const t=String(raw||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').trim();if(!t)return[];
+  const L=t.split('\n'),NUM=/^\s*(?:q(?:uestion)?\.?\s*)?(\d{1,3})\s*[.):]\s*(.*)$/i,starts=[],seen=new Set();
+  L.forEach((l,i)=>{const m=l.match(NUM);if(m&&!seen.has(+m[1])&&(m[2].trim()||L[i+1])){seen.add(+m[1]);starts.push([i,m[1],m[2]])}});
+  let blocks=[];
+  if(starts.length)starts.forEach((s,k)=>{const end=k+1<starts.length?starts[k+1][0]:L.length;blocks.push({n:s[1],text:(s[2]+' '+L.slice(s[0]+1,end).join(' ')).replace(/\s+/g,' ').trim()})});
+  else{let parts=t.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+    if(parts.length===1){const ls=parts[0].split('\n').map(x=>x.trim()).filter(Boolean),qlike=x=>/[?.]$/.test(x)||/^(what|why|how|who|when|where|which|explain|describe|define|name|state|write|list|give|differentiate|compare|draw|discuss)\b/i.test(x);
+      if(ls.length>1&&!getOpts(parts[0])&&ls.every(qlike))parts=ls}
+    blocks=parts.map((p,i)=>({n:String(i+1),text:p.replace(/\s+/g,' ')}))}
+  return blocks.filter(b=>b.text).map(b=>{const o=getOpts(b.text);return{n:b.n,stem:o?o.stem:b.text,opts:o?o.opts:null}})}
+// ---- answering ----
+function mcqAnswer(q,I){
+  const Ls=Object.keys(q.opts),sT=tok(q.stem),sSet=new Set(sT),ot={};Ls.forEach(l=>ot[l]=tok(q.opts[l]));
+  const top=I.search(sT.length?sT:[].concat(...Ls.map(l=>ot[l])),6);
+  if(!top.length)return{a:'?',miss:1};
+  const mx=top[0][1],ct=top.map(([id,s])=>({s:s/mx,t:tok(I.docs[id].text),n:(' '+I.docs[id].text.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()+' ')}));
+  const neg=/\b(except|incorrect|false|wrong|odd one)\b|\b(is|are|was|were|does|do|did)\s+not\b|\bnot\s+(a|an|the|true|correct|among|one|related|present|found|made|used)\b/i.test(q.stem),sc={};
+  for(const l of Ls){
+    const o=ot[l].filter(w=>!sSet.has(w));let v=0;
+    if(o.length){const tw=o.reduce((a,w)=>a+I.idf(w),0)||1;
+      for(const c of ct){const cs=new Set(c.t);let hit=0;o.forEach(w=>{if(cs.has(w))hit+=I.idf(w)});if(!hit)continue;
+        let d=99;const ps=[],po=[];c.t.forEach((w,i)=>{if(sSet.has(w))ps.push(i);if(o.includes(w))po.push(i)});
+        ps.forEach(a=>po.forEach(b=>{const x=Math.abs(a-b);if(x<d)d=x}));
+        v+=c.s*(hit/tw)*(1+.6/(1+d/4));
+        if(po.some(b=>sSet.has(c.t[b+1])))v+=.4*c.s; // an option right before a word of the question, e.g. "four chambers"
+        const ph=' '+q.opts[l].toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()+' ';if(ph.length>4&&c.n.includes(ph))v+=.5*c.s}}
+    sc[l]=v}
+  const rank=Ls.slice().sort((a,b)=>sc[b]-sc[a]);
+  if(!(sc[rank[0]]>0))return{a:'?',miss:1};
+  if(neg){const lo=Ls.slice().sort((a,b)=>sc[a]-sc[b])[0];return{a:lo,low:1}}
+  const b=sc[rank[0]],s2=rank[1]!==undefined?sc[rank[1]]:0;
+  return{a:rank[0],low:(b-s2)/b<.2||b<.2}}
+function freeAnswer(q,I){
+  const T=tok(q.stem),top=I.search(T,4);
+  if(!top.length)return{t:'short',a:'?',miss:1};
+  const pg=I.docs[top[0][0]].page;
+  if(/\b(draw|sketch|diagram|label|plot|graph|tabulate|table)\b/i.test(q.stem))return{t:'short',a:'needs a drawing/table - use Online mode (see book p.'+pg+')',low:1};
+  const Tset=new Set(T),isDef=/^\s*(what|define|meaning|state)\b/i.test(q.stem),long=/(explain|describe|discuss|derive|differentiate|compare|write (short )?notes?|how (does|do|is)|steps|procedure|why|elaborate)/i.test(q.stem);
+  const cand=new Map();
+  top.forEach(([id,s],ci)=>splitSent(I.docs[id].text).forEach((sent,si)=>{
+    const st=tok(sent);let v=0;new Set(st).forEach(w=>{if(Tset.has(w))v+=I.idf(w)});if(!v)return;
+    v=v/Math.sqrt(st.length+4)*(1+.3*(top.length-ci)/top.length);
+    if(isDef&&/\b(is|are|refers? to|means?|defined as)\b/.test(sent))v*=1.25;
+    const o=cand.get(sent);if(!o||o.v<v)cand.set(sent,{v,sent,page:I.docs[id].page,id,si})}));
+  const cs=[...cand.values()].sort((x,y)=>y.v-x.v);
+  if(!cs.length)return{t:'short',a:'?',miss:1};
+  const cut=(s,n)=>{const w=s.split(/\s+/);return w.length>n?w.slice(0,n).join(' ')+'...':s};
+  if(!long)return{t:'short',a:cut(cs[0].sent,28)+' [p.'+cs[0].page+']',low:cs[0].v<.45};
+  const pick=cs.slice(0,4).sort((x,y)=>x.page-y.page||x.id-y.id||x.si-y.si);
+  return{t:'long',s:pick.map(c=>cut(c.sent,18)).concat(['(book p.'+[...new Set(pick.map(c=>c.page))].join(', ')+')'])}}
+function answerAll(qs,I){
+  const items=[],low=[],miss=[];
+  for(const q of qs){const r=q.opts?mcqAnswer(q,I):freeAnswer(q,I);
+    items.push({n:q.n,t:q.opts?'mcq':r.t,a:r.a,s:r.s});if(r.miss)miss.push(q.n);else if(r.low)low.push(q.n)}
+  return{items,low,miss}}
+const $=s=>document.querySelector(s);
+const load=k=>{try{return localStorage.getItem(k)||''}catch(e){return ''}};
+const save=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const TXT=15000,TXTMAX=120000; // document text: per request / total
+const THINK=1024;  // Gemini 2.5 thinking budget (Gemini 3.x models use a fixed "low" thinking level instead)
+const PROMPT=`You answer exam questions from the attached pages (photos, PDF pages or document text, in random order). Answer EVERY question, using its own printed number (if none is printed, number them 1,2,3). Never skip one, including diagram, table or picture questions.
+Reply with ONLY one JSON object and no other text: {"q":[{"n":"1","t":"mcq","a":"b"}]}
+t="mcq": a = option letter in lowercase ("a,c" if several; options numbered 1-4 = a-d; also when the options are pictures).
+t="short": a = answer in max 12 words (fill in the blank, true/false, match the following "A-2, B-3").
+t="long": s = 2-6 steps of max 15 words, the last step is the final answer.
+t="diagram" (draw, sketch or label a figure, graph or circuit): a = what to draw (max 12 words), s = 3-6 labels, svg = a simple SVG drawing (viewBox='0 0 400 300', single quotes, shapes and text only, under 1500 characters).
+t="table": rows = [[header cells],[row cells],...] with short cells.
+If the answer depends on a figure on a page, add fig:{p:<image number in this request, 1 = first>,b:[ymin,xmin,ymax,xmax] on a 0-1000 scale}.
+Sub-parts get their own entry: n "3a", "3b". If unsure, still give your best guess ("?" only if nothing is readable).`;
+const SCHEMA={type:'OBJECT',properties:{q:{type:'ARRAY',items:{type:'OBJECT',properties:{n:{type:'STRING'},t:{type:'STRING',enum:['mcq','short','long','diagram','table']},a:{type:'STRING'},s:{type:'ARRAY',items:{type:'STRING'}},rows:{type:'ARRAY',items:{type:'ARRAY',items:{type:'STRING'}}},svg:{type:'STRING'},fig:{type:'OBJECT',properties:{p:{type:'INTEGER'},b:{type:'ARRAY',items:{type:'INTEGER'}}}}},required:['n','t']}}},required:['q']};
+const P=t=>PROMPT+(t?'\n\nDOCUMENT TEXT (the questions are inside it):\n'+t:'');
+// rung 0 = full settings, 1 = JSON only, 2 = bare request (used if an engine rejects a setting)
+// Model names change often, so every engine has a list: if one is gone (error 404) the next is tried automatically,
+// and Groq / OpenRouter also ask their own servers which vision models are available right now.
+const pref=(id,l)=>{const s=load('m_'+id);return s&&l.includes(s)?[s,...l.filter(x=>x!==s)]:l};
+async function httpErr(name,r){let m='';
+  try{const j=await r.json();m=(j.error&&(j.error.message||j.error))||j.message||''}catch(e){}
+  m=String(m).replace(/\s+/g,' ').slice(0,140);
+  const e=new Error(name+' error '+r.status+(m?': '+m:''));
+  e.nomodel=r.status===404||(r.status===400&&/model/i.test(m)&&/not found|does not exist|decommission|deprecat/i.test(m));
+  e.over=r.status>=500||/overload|high demand|unavailable|try again later/i.test(m);   // service busy right now
+  e.busy=e.over||r.status===429;                                                       // busy or out of quota for this model
+  return e}
+async function getJSON(url,key){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),6000);
+  try{const r=await fetch(url,{signal:ac.signal,headers:key?{Authorization:'Bearer '+key}:{}});return r.ok?await r.json():null}
+  catch(e){return null}finally{clearTimeout(t)}}
+const eng=o=>({mi:0,get model(){return this.models[this.mi]},next(){if(this.mi+1<this.models.length){this.mi++;return true}return false},...o});
+function OAI(o){return eng({mb:3.5e6,...o,async run(k,imgs,sig,rung,text){
+  const body={model:this.model,messages:[{role:'user',content:[{type:'text',text:P(text)},...imgs.map(b=>({type:'image_url',image_url:{url:'data:image/jpeg;base64,'+b}}))]}]};
+  if(rung<2){body.temperature=0.6;body.max_tokens=8000}
+  if(rung<1){body.response_format={type:'json_object'};if(this.think&&this.think.test(this.model))Object.assign(body,this.extra)}
+  const r=await fetch(this.url,{method:'POST',signal:sig,headers:{'Content-Type':'application/json',Authorization:'Bearer '+k},body:JSON.stringify(body)});
+  if(!r.ok)throw await httpErr(this.name,r);
+  const j=await r.json(),c=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
+  if(!c)throw new Error('empty reply');
+  return typeof c==='string'?c:c.map(z=>z.text||'').join('')}})}
+// cap = most photos that engine takes in ONE request (checked against each service's own docs). The app's photo limit is the sum of these.
+const PROVIDERS=[
+  eng({id:'gemini',name:'Gemini',cap:15,mb:12e6,rotate:true,models:pref('gemini',['gemini-flash-latest','gemini-2.5-flash','gemini-flash-lite-latest','gemini-2.5-flash-lite']),async run(k,imgs,sig,rung,text){
+    const body={contents:[{parts:[{text:P(text)},...imgs.map(b=>({inline_data:{mime_type:'image/jpeg',data:b}}))]}]};
+    if(rung<2)body.generationConfig={maxOutputTokens:8192,responseMimeType:'application/json'};
+    if(rung<1){body.generationConfig.responseSchema=SCHEMA;body.generationConfig.thinkingConfig=/2\.5/.test(this.model)?{thinkingBudget:THINK}:{thinkingLevel:'low'}}
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+this.model+':generateContent?key='+k,{method:'POST',signal:sig,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok)throw await httpErr('Gemini',r);
+    const j=await r.json(),p=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts;
+    const t=p?p.filter(x=>!x.thought).map(x=>x.text||'').join(''):'';
+    if(!t)throw new Error('empty reply');
+    return t}}),
+  OAI({id:'groq',name:'Groq',cap:3,url:'https://api.groq.com/openai/v1/chat/completions',models:pref('groq',['qwen/qwen3.8-27b','qwen/qwen3.6-27b']),
+    think:/qwen|gpt-oss/,extra:{reasoning_effort:'low',reasoning_format:'hidden'},
+    async init(k){const j=await getJSON('https://api.groq.com/openai/v1/models',k),ids=j&&Array.isArray(j.data)?j.data.map(m=>m.id):[];if(!ids.length)return;
+      const ok=this.models.filter(m=>ids.includes(m)),more=ids.filter(i=>/qwen.*(27b|vl)|llama-4|scout|maverick|vision/i.test(i)&&!/guard|whisper|tts/i.test(i)&&!this.models.includes(i)),l=[...ok,...more];
+      if(l.length){this.models=pref(this.id,l);this.mi=0}}}),
+  OAI({id:'or',name:'OpenRouter',cap:4,rotate:true,url:'https://openrouter.ai/api/v1/chat/completions',
+    models:pref('or',['google/gemma-4-31b-it:free','google/gemma-4-26b-a4b-it:free','nvidia/nemotron-nano-12b-v2-vl:free','nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free','openrouter/free']),
+    async init(k){const j=await getJSON('https://openrouter.ai/api/v1/models',k),d=j&&Array.isArray(j.data)?j.data:[];
+      const free=d.filter(m=>m.architecture&&(m.architecture.input_modalities||[]).includes('image')&&(/:free$/.test(m.id)||(m.pricing&&+m.pricing.prompt===0&&+m.pricing.completion===0))).map(m=>m.id);
+      if(!free.length)return;
+      const sc=i=>/gemma-4/.test(i)?3:/nemotron.*(vl|omni)|qwen.*vl/.test(i)?2:/vision|llama/.test(i)?1:0;
+      const st=this.models.filter(m=>m!=='openrouter/free'&&free.includes(m)),more=free.filter(i=>!st.includes(i)&&i!=='openrouter/free'&&!/guard|safety|rerank|embed/i.test(i)).sort((x,y)=>sc(y)-sc(x)).slice(0,5);
+      this.models=pref(this.id,[...st,...more,'openrouter/free']);this.mi=0}})
+];
+let files=[],lastText='';
+const imgCount=()=>files.filter(x=>x.kind==='img').length;
+const lim=()=>{const k=PROVIDERS.filter(p=>load('k_'+p.id));return (k.length?k:PROVIDERS).reduce((s,p)=>s+p.cap,0)};
+function show(t,v){$('#res').hidden=false;$('#out').textContent=t;lastText=t;$('#via').textContent=v||''}
+function add(list){for(const f of list){
+  if(imgCount()>=lim()){show('Limit reached: '+lim()+' photos, the most your AI keys can take in one go. Add another key or remove a photo.');break}
+  files.push({kind:'img',f,u:URL.createObjectURL(f)})}thumbs()}
+function addText(name,text){files.push({kind:'txt',name,text:text.slice(0,TXTMAX)});thumbs()}
+function thumbs(){const t=$('#th');t.innerHTML='';
+  files.forEach(x=>{const d=el('div','tb');let c;
+    if(x.kind==='img'){c=el('img');c.src=x.u;c.alt='Photo';
+      c.onclick=async()=>{const b=await crop(x.f);if(b){URL.revokeObjectURL(x.u);const i=files.indexOf(x);if(i>=0)files[i]={kind:'img',f:b,u:URL.createObjectURL(b)};thumbs()}}}
+    else c=el('div','chip','📄 '+x.name+' · '+x.text.length+' chars');
+    const r=el('button','rm','✕');r.setAttribute('aria-label','Remove');
+    r.onclick=()=>{if(x.u)URL.revokeObjectURL(x.u);const i=files.indexOf(x);if(i>=0)files.splice(i,1);thumbs()};
+    d.append(c,r);t.append(d)});
+  const dn=files.length-imgCount();
+  const kk=PROVIDERS.filter(p=>load('k_'+p.id)),bd=(kk.length?kk:PROVIDERS).map(p=>p.name+' '+p.cap).join(' + ');
+  $('#cnt').textContent=(files.length?imgCount()+' of '+lim()+' photos'+(dn?' · '+dn+' document'+(dn>1?'s':''):'')+' · tap a photo to crop · limit '+lim()+' = ':'Up to '+lim()+' photos at once = ')+bd+(kk.length?'':' (add keys below)')}
+async function addAny(list){
+  for(const f of list){const n=(f.name||'').toLowerCase(),t=f.type||'';
+    try{
+      if(f.size>15e6&&!t.startsWith('image/')){show(f.name+' is over 15 MB — too big for this app.');continue}
+      if(t.startsWith('image/')||/\.(jpe?g|png|webp|gif|bmp|heic)$/.test(n))add([f]);
+      else if(t==='application/pdf'||n.endsWith('.pdf'))await addPdf(f);
+      else if(/\.(docx|odt)$/.test(n)||/wordprocessingml|opendocument\.text/.test(t))await addDoc(f);
+      else if(t==='text/plain'||n.endsWith('.txt'))addText(f.name,await f.text());
+      else if(n.endsWith('.doc'))show('Old .doc files can’t be read. Save it as .docx or PDF and add it again.');
+      else show('This file type isn’t supported: '+f.name)
+    }catch(e){show(e&&e.message?e.message:'Could not read '+f.name)}}}
+const b64blob=(s,type)=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Blob([u],{type})};
+async function addPdf(f){
+  if(!window.Android){show('PDF files work in the Android app only.');return}
+  const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(f)});
+  const n=Android.open(b64);if(!(n>0))throw 0;
+  const room=Math.max(0,lim()-imgCount());
+  for(let i=0;i<Math.min(n,room);i++){const s=Android.page(i);if(s)add([b64blob(s,'image/jpeg')])}
+  Android.close();
+  if(n>room)show('Added '+room+' of '+n+' pages. The limit is '+lim()+' photos.')}
+async function unzip(buf){
+  const v=new DataView(buf),u=new Uint8Array(buf);let e=buf.byteLength-22;
+  while(e>=0&&v.getUint32(e,true)!==0x06054b50)e--;
+  if(e<0)throw 0;
+  const n=v.getUint16(e+10,true),out={};let p=v.getUint32(e+16,true);
+  for(let i=0;i<n;i++){
+    const m=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),nl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),off=v.getUint32(p+42,true);
+    const lo=off+30+v.getUint16(off+26,true)+v.getUint16(off+28,true);
+    out[new TextDecoder().decode(u.subarray(p+46,p+46+nl))]={m,d:u.subarray(lo,lo+cs)};
+    p+=46+nl+xl+cl}
+  return out}
+async function inflate(z){if(z.m===0)return z.d;
+  return new Uint8Array(await new Response(new Blob([z.d]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())}
+function xmlText(x){
+  return x.replace(/<w:tc[ >][\s\S]*?<\/w:tc>|<table:table-cell[ >][\s\S]*?<\/table:table-cell>/g,m=>m.replace(/<\/w:p>|<\/text:p>/g,' ').replace(/<\/w:tc>|<\/table:table-cell>/,' | '))
+   .replace(/<w:tab\/>/g,'\t').replace(/<\/w:tr>|<\/table:table-row>/g,'\n')
+   .replace(/<\/w:p>|<\/text:p>|<\/text:h>|<w:br[^>]*\/>|<text:line-break\/>/g,'\n').replace(/<[^>]+>/g,'')
+   .replace(/&#x([0-9a-f]+);/gi,(_,h)=>String.fromCodePoint(parseInt(h,16))).replace(/&#(\d+);/g,(_,d)=>String.fromCodePoint(+d))
+   .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,'&')
+   .replace(/ {2,}/g,' ').replace(/ \| \n/g,'\n').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
+async function addDoc(f){
+  if(typeof DecompressionStream==='undefined')throw new Error('Word files need a newer “Android System WebView”. Update it in the Play Store, or save the file as PDF.');
+  const z=await unzip(await f.arrayBuffer()),key=z['word/document.xml']?'word/document.xml':z['content.xml']?'content.xml':'';
+  if(!key)throw 0;
+  const text=xmlText(new TextDecoder().decode(await inflate(z[key])));
+  if(text)addText(f.name,text);
+  for(const k of Object.keys(z).filter(k=>/^(word\/media|Pictures)\/.+\.(png|jpe?g|webp|gif|bmp)$/i.test(k)).sort()){
+    if(imgCount()>=lim())break;
+    const d=await inflate(z[k]);if(d.length<4000)continue;
+    add([new Blob([d],{type:'image/'+k.match(/\.(\w+)$/)[1].toLowerCase().replace('jpg','jpeg')})])}}
+$('#f').onchange=async e=>{const l=[...e.target.files];e.target.value='';await addAny(l)};
+$('#fc').onchange=async e=>{const l=[...e.target.files];e.target.value='';for(const f of l){const b=await crop(f);if(b)add([b])}};
+$('#clr').onclick=()=>{files.forEach(x=>x.u&&URL.revokeObjectURL(x.u));files=[];thumbs();$('#res').hidden=true};
+function crop(file){return new Promise(async res=>{
+  const ov=$('#crop'),cv=$('#cv'),cx=cv.getContext('2d');let bm=await createImageBitmap(file),W,H,sc,R,m=null;
+  const draw=()=>{cx.drawImage(bm,0,0,W,H);cx.fillStyle='rgba(0,0,0,.55)';
+    cx.fillRect(0,0,W,R.y);cx.fillRect(0,R.y+R.h,W,H);cx.fillRect(0,R.y,R.x,R.h);cx.fillRect(R.x+R.w,R.y,W,R.h);
+    cx.strokeStyle='#fff';cx.lineWidth=2;cx.strokeRect(R.x,R.y,R.w,R.h);cx.fillStyle='#fff';
+    [[R.x,R.y],[R.x+R.w,R.y],[R.x,R.y+R.h],[R.x+R.w,R.y+R.h]].forEach(([a,b])=>cx.fillRect(a-9,b-9,18,18))};
+  const fit=()=>{sc=Math.min((innerWidth-24)/bm.width,(innerHeight-130)/bm.height);W=cv.width=Math.round(bm.width*sc);H=cv.height=Math.round(bm.height*sc);R={x:0,y:0,w:W,h:H};draw()};
+  const pt=e=>{const b=cv.getBoundingClientRect();return{x:(e.clientX-b.left)*W/b.width,y:(e.clientY-b.top)*H/b.height}};
+  cv.onpointerdown=e=>{const p=pt(e);
+    const c=[[R.x,R.y,'l','t'],[R.x+R.w,R.y,'r','t'],[R.x,R.y+R.h,'l','b'],[R.x+R.w,R.y+R.h,'r','b']].find(c=>Math.abs(p.x-c[0])<32&&Math.abs(p.y-c[1])<32);
+    m=c?{h:c[2],v:c[3]}:(p.x>R.x&&p.x<R.x+R.w&&p.y>R.y&&p.y<R.y+R.h?{dx:p.x-R.x,dy:p.y-R.y}:null);try{cv.setPointerCapture(e.pointerId)}catch(_){}};
+  cv.onpointermove=e=>{if(!m)return;const p=pt(e),X=Math.max(0,Math.min(W,p.x)),Y=Math.max(0,Math.min(H,p.y));
+    if(m.h){let x1=R.x,x2=R.x+R.w,y1=R.y,y2=R.y+R.h;
+      if(m.h==='l')x1=Math.min(X,x2-40);else x2=Math.max(X,x1+40);
+      if(m.v==='t')y1=Math.min(Y,y2-40);else y2=Math.max(Y,y1+40);
+      R={x:x1,y:y1,w:x2-x1,h:y2-y1}}
+    else{R.x=Math.max(0,Math.min(W-R.w,p.x-m.dx));R.y=Math.max(0,Math.min(H-R.h,p.y-m.dy))}
+    draw()};
+  cv.onpointerup=()=>{m=null};
+  $('#cx').onclick=()=>{ov.hidden=true;res(null)};
+  $('#cr').onclick=()=>{const o=document.createElement('canvas');o.width=bm.height;o.height=bm.width;const c=o.getContext('2d');
+    c.translate(o.width,0);c.rotate(Math.PI/2);c.drawImage(bm,0,0);createImageBitmap(o).then(b=>{bm=b;fit()})};
+  $('#cu').onclick=()=>{const k=1/sc,o=document.createElement('canvas');o.width=Math.round(R.w*k);o.height=Math.round(R.h*k);
+    o.getContext('2d').drawImage(bm,R.x*k,R.y*k,R.w*k,R.h*k,0,0,o.width,o.height);o.toBlob(b=>{ov.hidden=true;res(b)},'image/jpeg',.9)};
+  ov.hidden=false;fit()})}
+const kst=id=>{const v=load('k_'+id);$('#s_'+id).textContent=v?'saved · '+v.length+' characters':''};
+PROVIDERS.forEach(p=>{const e=$('#k_'+p.id);e.value=load('k_'+p.id);kst(p.id);e.oninput=()=>{save('k_'+p.id,e.value.trim());kst(p.id);thumbs()}});
+const tl=()=>{const v=parseInt(load('tl'),10);return isNaN(v)?85:Math.min(600,Math.max(5,v))};
+const tls=()=>{$('#s_tl').textContent='Each request waits up to '+tl()+' seconds (allowed 5–600, default 85).'};
+$('#tl').value=load('tl');tls();
+$('#tl').oninput=()=>{const e=$('#tl');e.value=e.value.replace(/\D/g,'');save('tl',e.value);tls()};
+$('#tlr').onclick=()=>{save('tl','');$('#tl').value='';tls()};
+async function pasteKey(id){let t='';
+  try{t=(window.Android&&window.Android.paste)?window.Android.paste():await navigator.clipboard.readText()}catch(e){}
+  t=String(t||'').trim();
+  if(!t){$('#s_'+id).textContent='Clipboard is empty — copy the key first, then tap Paste.';return}
+  const e=$('#k_'+id);e.value=t;e.oninput()}
+document.querySelectorAll('.pb').forEach(b=>{b.onclick=()=>pasteKey(b.dataset.k)});
+thumbs();
+async function shrink(f){const b=await createImageBitmap(f),k=Math.min(1,1500/Math.max(b.width,b.height)),c=document.createElement('canvas');
+  c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);
+  if(b.close)b.close();return c.toDataURL('image/jpeg',.8).split(',')[1]}
+function chunkText(t){const o=[];let c='';for(const l of t.split('\n')){if(c&&c.length+l.length>TXT){o.push(c);c=''}c+=l+'\n'}if(c.trim())o.push(c);return o}
+const can=(u,p)=>!(u.fail&&u.fail.has(p.id));
+function take(q,p){ // next batch from the queue that fits this engine's limits and that it hasn't already failed
+  const i=q.findIndex(u=>can(u,p));if(i<0)return[];
+  if(q[i].kind==='txt')return q.splice(i,1);
+  let j=i,sz=0;
+  while(j<q.length&&q[j].kind==='img'&&can(q[j],p)&&j-i<p.cap&&(j===i||sz+q[j].b.length<=p.mb)){sz+=q[j].b.length;j++}
+  return q.splice(i,j-i)}
+let HEDGE_MS=null,BACKOFF=3000,STALL=null;            // (the tests change these)
+const stallMs=n=>STALL!==null?STALL:Math.min(tl(),25+6*n)*1000;   // how long a model that has a spare to fall back on may take before we try the spare
+const hedgeMs=fb=>HEDGE_MS!==null?HEDGE_MS:(12+4*fb.units.filter(u=>u.kind==='img').length)*1000;
+async function attempt(p,b,errs,ctl){
+  const imgs=b.filter(u=>u.kind==='img').map(u=>u.b),text=(b.find(u=>u.kind==='txt')||{}).text;
+  const dl=Date.now()+tl()*1000;   // the time limit is the TOTAL a batch may wait on this engine, shared by all its models
+  let n=0,rounds=0;
+  for(let g=0;g<16;g++){
+    const left=dl-Date.now();
+    if(g>0&&left<2500){errs.push(p.name+': timed out after '+tl()+' s');return{quota:false}}
+    const ac=new AbortController();if(ctl)ctl.abort=()=>ac.abort();
+    const last=!p.rotate||p.mi>=p.models.length-1;
+    const t=setTimeout(()=>ac.abort(),Math.max(1000,Math.min(last?tl()*1000:stallMs(imgs.length),left)));
+    try{const r={q:parse(await p.run(load('k_'+p.id),imgs,ac.signal,n,text)).q};save('m_'+p.id,p.model);return r}
+    catch(e){
+      if(ctl&&ctl.cancelled)return{cancelled:true};
+      const m=e.message||'';
+      if(p.rotate){ // Gemini / OpenRouter: model gone, busy, out of quota or stalled -> try the next model of the same service
+        const swap=e.nomodel||e.busy||e.name==='AbortError';
+        if(swap&&p.next()){n=0;continue}
+        if(swap&&e.over&&rounds++<1){await sleep(BACKOFF);p.mi=0;n=0;continue} // every model busy: short pause, one more round
+      }else if(e.nomodel&&p.next())continue; // (Groq: unchanged)
+      const hard=e.name==='AbortError'||/error (?!400|422)\d/.test(m)||/fetch|network|load failed/i.test(m);
+      if(!hard&&n<2){n++;continue}
+      errs.push(p.name+': '+(e.name==='AbortError'?'timed out after '+tl()+' s':(hard||/error \d/.test(m))?m:'unreadable reply'));
+      return{quota:/error (429|401|402|403|404)/.test(m)}}
+    finally{clearTimeout(t)}}
+  return{quota:false}}
+// All engines work at the same time from one shared queue, each taking only what its own limit allows.
+// If an engine hits a limit or fails, that work goes back in the queue (in order) and another engine takes it.
+// If an engine is just slow, an idle engine helps with the same photos and whoever answers first wins.
+async function runAll(units,ps,errs,say){
+  const queue=units.map((u,i)=>({...u,i})),done=[],dead=new Set(),strikes={},st={},since={},used=new Set(),flights=new Set();let busy=0;
+  const upd=()=>say(ps.map(p=>p.name+(p.model?' · '+p.model:'')+': '+(st[p.name]||'waiting')+(since[p.name]?' — '+Math.round((Date.now()-since[p.name])/1000)+' s':'')).join('\n'));
+  ps.forEach(p=>{if(p.rotate)p.mi=0});
+  await Promise.all(ps.map(async p=>{if(p.init&&!p.inited){p.inited=true;try{await p.init(load('k_'+p.id))}catch(e){}}}));
+  const fits=(fb,p)=>{const im=fb.units.filter(u=>u.kind==='img');
+    return fb.units.every(u=>can(u,p))&&(fb.units[0].kind==='txt'?fb.units.length===1:(im.length===fb.units.length&&im.length<=p.cap&&im.reduce((s,u)=>s+u.b.length,0)<=p.mb))};
+  const hedgeFor=p=>{const now=Date.now();for(const fb of flights)if(!fb.done&&!fb.eng.has(p.id)&&now-fb.start>hedgeMs(fb)&&fits(fb,p))return fb};
+  const exec=async(p,fb)=>{
+    const ctl={};fb.ctls.push(ctl);fb.running++;fb.eng.add(p.id);busy++;
+    st[p.name]=(fb.eng.size>1?'helping with ':'sending ')+(fb.units[0].kind==='txt'?'document text':fb.units.length+' photo'+(fb.units.length>1?'s':''))+'…';since[p.name]=Date.now();upd();
+    const r=await attempt(p,fb.units,errs,ctl);
+    busy--;fb.running--;delete since[p.name];
+    if(r.cancelled||fb.done){st[p.name]='stopped (another engine was faster)';upd();return}
+    if(r.q){
+      fb.done=true;flights.delete(fb);fb.ctls.forEach(c=>{if(c!==ctl){c.cancelled=true;if(c.abort)c.abort()}});
+      const im=fb.units.filter(u=>u.kind==='img');
+      r.q.forEach(it=>{if(it.fig){const u=im[it.fig.p-1];if(u)it.figUnit=u.i;else it.fig=null}});
+      done.push({i:fb.units[0].i,q:r.q});used.add(p.name);strikes[p.id]=0;st[p.name]='finished a batch';upd();return}
+    fb.units.forEach(u=>(u.fail=u.fail||new Set()).add(p.id));
+    if(!fb.running){flights.delete(fb);queue.push(...fb.units);queue.sort((x,y)=>x.i-y.i)}
+    strikes[p.id]=(strikes[p.id]||0)+1;
+    if(r.quota||strikes[p.id]>=3){dead.add(p.id);st[p.name]=(r.quota?'limit reached or not available':'failed')+', work passed on'}else st[p.name]='retrying…';
+    upd()};
+  const worker=async p=>{
+    while(!dead.has(p.id)){
+      const b=take(queue,p);let fb;
+      if(b.length){fb={units:b,start:Date.now(),running:0,done:false,ctls:[],eng:new Set()};flights.add(fb)}
+      else{fb=hedgeFor(p);if(!fb){if(!busy)break;await sleep(100);continue}}
+      await exec(p,fb)}};
+  const tick=setInterval(upd,1000);
+  try{await Promise.all(ps.map(worker))}finally{clearInterval(tick)}
+  return{done,left:queue,used}}
+function svgURL(s){s=String(s||'');const i=s.indexOf('<svg'),j=s.lastIndexOf('</svg>');
+  if(i<0||j<0||s.length>20000)return'';s=s.slice(i,j+6);
+  if(/<script|<foreignObject|\son\w+\s*=|javascript:/i.test(s))return''; // an <img> can't run scripts anyway; this is a second lock
+  if(!/xmlns=/.test(s.slice(0,300)))s=s.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
+  if(!/viewBox/i.test(s.slice(0,400)))s=s.replace('<svg','<svg viewBox="0 0 400 300"');
+  s=s.replace(/<svg[^>]*>/,m=>m+'<style>svg{fill:none;stroke:#000}text,tspan{fill:#000;stroke:none;font-family:sans-serif}</style>');
+  return'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s)}
+function cropFig(b64,b){return new Promise(res=>{const im=new Image();
+  im.onload=()=>{const W=im.width,H=im.height,x=b[1]/1000*W,y=b[0]/1000*H,w=(b[3]-b[1])/1000*W,h=(b[2]-b[0])/1000*H,c=document.createElement('canvas');
+    c.width=Math.max(1,Math.round(w));c.height=Math.max(1,Math.round(h));c.getContext('2d').drawImage(im,x,y,w,h,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.85))};
+  im.onerror=()=>res(null);im.src='data:image/jpeg;base64,'+b64})}
+function showItems(q,via,note,U){
+  const items=order(q),o=$('#out');o.innerHTML='';lastText=plain(items);$('#res').hidden=false;$('#via').textContent=via||'';
+  items.forEach(x=>{const d=el('div','it'),lines=fmt({q:[x]}).split('\n');
+    if(x.t==='table'&&x.rows){d.append(el('div',0,lines[0]));
+      const t=el('table'),w=el('div','sc');x.rows.forEach((r,i)=>{const tr=el('tr');r.forEach(c=>tr.append(el(i?'td':'th',0,c)));t.append(tr)});w.append(t);d.append(w)}
+    else if(x.t==='diagram'){d.append(el('div',0,lines[0]));const u=svgURL(x.svg);
+      if(u){const im=el('img','dg');im.alt='Diagram';im.onerror=()=>{im.hidden=true};im.src=u;d.append(im)}
+      if(lines.length>1)d.append(el('div',0,lines.slice(1).join('\n')))}
+    else d.append(el('div',0,lines.join('\n')));
+    if((x.t==='diagram'||x.t==='table')&&x.fig&&U&&U[x.figUnit]&&U[x.figUnit].b){
+      const im=el('img','fg');im.alt='Figure from your file';d.append(im);cropFig(U[x.figUnit].b,x.fig.b).then(s=>{if(s)im.src=s;else im.remove()})}
+    o.append(d)});
+  const g=gaps(items),w=[note,g.length?'No answer found for question'+(g.length>1?'s ':' ')+g.join(', ')+'. Check those photos or add them again.':''].filter(Boolean).join('\n');
+  if(w)o.append(el('div','warn',w))}
+$('#go').onclick=async()=>{
+  if(!files.length)return show('Add at least one photo or file.');
+  const ps=PROVIDERS.filter(p=>load('k_'+p.id));
+  if(!ps.length){$('details').open=true;return show('Add at least one free API key below.')}
+  if(imgCount()>lim())return show('Too many photos for your keys: the limit is '+lim()+'. Remove '+(imgCount()-lim())+'.');
+  $('#go').disabled=true;const errs=[];
+  try{
+    show('Preparing…');
+    const units=[];let n=0;
+    for(const x of files){
+      if(x.kind==='txt')for(const c of chunkText(x.text))units.push({kind:'txt',text:'From '+x.name+':\n'+c,name:x.name});
+      else units.push({kind:'img',b:await shrink(x.f),name:'Photo '+(++n)})}
+    const {done,left,used}=await runAll(units,ps,errs,s=>show(s));
+    done.sort((a,b)=>a.i-b.i);
+    const all=done.flatMap(d=>d.q),np=units.filter(u=>u.kind==='img').length,names=[...new Set(left.map(u=>u.name))];
+    const note=left.length?'Not read: '+names.slice(0,8).join(', ')+(names.length>8?' …':'')+'. Every engine failed or reached its limit:\n'+[...new Set(errs)].join('\n'):'';
+    if(!all.length)return show(note||'No answers found.');
+    showItems(all,'via '+[...used].join(', ')+' · '+np+' photo'+(np===1?'':'s')+(units.length>np?' + document text':''),note,units);
+  }catch(e){show('Could not read the files.')}
+  finally{$('#go').disabled=false}
+};
+$('#cp').onclick=()=>{const b=$('#cp');let ok=false;
+  try{if(window.Android&&window.Android.copy){window.Android.copy(lastText);ok=true}}catch(e){}
+  if(!ok){try{const t=document.createElement('textarea');t.value=lastText;t.style.cssText='position:fixed;opacity:0';document.body.append(t);t.select();ok=document.execCommand('copy');t.remove()}catch(e){}}
+  if(!ok&&navigator.clipboard)navigator.clipboard.writeText(lastText).catch(()=>{});
+  b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1200)};
+// ===== OFFLINE MODE: tabs, a library that stays saved after closing the app, phone-side text reading (OCR), answering =====
+const OFF={books:[],chunks:{},idx:null,ready:Promise.resolve(),files:[],pend:{},seq:0,running:false,last:''};
+const BU=b=>b.use!==false;
+const tabBtn=k=>$('#tab_'+k);
+function setTab(t){['on','off'].forEach(k=>{$('#pane_'+k).hidden=k!==t;tabBtn(k).classList.toggle('on',k===t);tabBtn(k).setAttribute('aria-selected',k===t?'true':'false')});tabBtn(t).classList.remove('done');save('tab',t)}
+tabBtn('on').onclick=()=>setTab('on');tabBtn('off').onclick=()=>setTab('off');
+// the dot on a tab pulses while that side is working and turns green when it finished while you were on the other tab
+const mark=(k,busy)=>{const b=tabBtn(k);b.classList.toggle('busy',busy);if(!busy&&$('#pane_'+k).hidden)b.classList.add('done')};
+let wasOn=false;setInterval(()=>{const b=$('#go').disabled;if(b!==wasOn){wasOn=b;mark('on',b)}},400);
+const bookBusy=()=>mark('off',OFF.running||OFF.books.some(b=>b.status==='reading'));
+// ---- saved library (IndexedDB) ----
+let dbp=null;
+function db(){return dbp||(dbp=new Promise((res,rej)=>{try{const r=indexedDB.open('ansdb',1);
+  r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('books',{keyPath:'id'});d.createObjectStore('chunks',{autoIncrement:true}).createIndex('book','book')};
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error||new Error('db'));r.onblocked=()=>rej(new Error('db blocked'))}catch(e){rej(e)}}))}
+const rq=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+async function dbDo(stores,mode,fn){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(stores,mode);let out;try{out=fn(t)}catch(e){rej(e);return}t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)})}
+const dbBooks=()=>dbDo('books','readonly',t=>rq(t.objectStore('books').getAll()));
+const dbBookPut=b=>dbDo('books','readwrite',t=>{t.objectStore('books').put(b)});
+const dbChunksAdd=l=>dbDo('chunks','readwrite',t=>{const s=t.objectStore('chunks');l.forEach(c=>s.add(c))});
+const dbChunksOf=id=>dbDo('chunks','readonly',t=>rq(t.objectStore('chunks').index('book').getAll(id)));
+const dbBookDel=id=>dbDo(['books','chunks'],'readwrite',t=>{t.objectStore('books').delete(id);const c=t.objectStore('chunks').index('book').openCursor(IDBKeyRange.only(id));c.onsuccess=()=>{const x=c.result;if(x){x.delete();x.continue()}}});
+let gen=0;
+function rebuild(){const my=++gen;
+  OFF.ready=(async()=>{const I=new BK(),done={};let k=0;
+    for(const b of OFF.books.filter(BU)){done[b.id]=0;const cs=OFF.chunks[b.id]||[];
+      for(let i=0;i<cs.length;i++){I.add(cs[i].text,{page:cs[i].page,book:b.id});done[b.id]=i+1;if(++k%250===0){await sleep(0);if(my!==gen)return}}}
+    if(my!==gen)return;
+    for(const b of OFF.books.filter(BU)){const cs=OFF.chunks[b.id]||[];for(let i=done[b.id]||0;i<cs.length;i++)I.add(cs[i].text,{page:cs[i].page,book:b.id})} // pages that arrived meanwhile
+    OFF.idx=I})();
+  return OFF.ready}
+const libMsg=t=>{$('#b_msg').textContent=t};
+const bookStatus=b=>b.status==='reading'?'reading page '+(b.done||0)+' of '+(b.total||'?')+'…':b.status==='ready'?(b.total||b.done)+' pages':b.status==='partial'?'partial: '+(b.done||0)+' of '+(b.total||'?')+' pages':'could not be read';
+function libDraw(){const L=$('#b_list');L.innerHTML='';
+  OFF.books.forEach(b=>{const d=el('div','bk'),c=el('input');c.type='checkbox';c.checked=BU(b);c.setAttribute('aria-label','Use this book for answers');
+    c.onchange=()=>{b.use=c.checked;dbBookPut(b).catch(()=>{});rebuild()};
+    const r=el('button','rm2','✕');r.setAttribute('aria-label','Remove this book');r.onclick=()=>bookRemove(b.id);
+    d.append(c,el('span',0,b.name),el('small',0,bookStatus(b)),r);L.append(d)})}
+async function libLoad(){
+  try{
+    const saved=(await dbBooks()).sort((a,b)=>a.added-b.added);
+    for(const b of saved){ // merge: never overwrite a book that is being added right now
+      if(OFF.books.some(x=>x.id===b.id))continue;
+      if(b.status==='reading')b.status=(b.done?'partial':'failed');
+      OFF.chunks[b.id]=await dbChunksOf(b.id);OFF.books.push(b)}
+    OFF.books.sort((a,b)=>a.added-b.added);
+    await rebuild()}
+  catch(e){libMsg('This phone would not keep the library saved (storage unavailable). Books work until the app is closed.')}
+  libDraw()}
+async function bookRemove(id){const b=OFF.books.find(x=>x.id===id);if(!b)return;
+  if(b.status==='reading'&&window.Android&&window.Android.cancelBook)try{window.Android.cancelBook(id)}catch(e){}
+  OFF.books=OFF.books.filter(x=>x!==b);delete OFF.chunks[id];libDraw();rebuild();bookBusy();
+  try{await dbBookDel(id)}catch(e){}}
+async function addBookPage(id,i,text){
+  const b=OFF.books.find(x=>x.id===id);if(!b)return;
+  const cs=chunkPage(text,i+1).map(c=>({book:id,page:c.page,text:c.text}));
+  OFF.chunks[id].push(...cs);b.done=Math.max(b.done||0,i+1);
+  if(BU(b)&&OFF.idx)cs.forEach(c=>OFF.idx.add(c.text,{page:c.page,book:id}));
+  try{if(cs.length)await dbChunksAdd(cs);if(b.done%10===0)await dbBookPut(b)}catch(e){}
+  libDraw()}
+// the Android app calls these while it reads a book PDF page by page
+window.bookInfo=(id,name,total)=>{const b={id,name,total,done:0,status:'reading',use:true,added:Date.now()};OFF.books.push(b);OFF.chunks[id]=[];dbBookPut(b).catch(()=>{});libDraw();bookBusy()};
+window.bookPage=(id,i,text)=>{addBookPage(id,i,text)};
+window.bookDone=id=>{const b=OFF.books.find(x=>x.id===id);if(!b)return;b.status=b.done?'ready':'failed';b.total=Math.max(b.total||0,b.done);dbBookPut(b).catch(()=>{});libDraw();bookBusy()};
+window.bookFail=(id,msg)=>{const b=OFF.books.find(x=>x.id===id);if(b){b.status=b.done?'partial':'failed';dbBookPut(b).catch(()=>{})}if(msg)libMsg(msg);libDraw();bookBusy()};
+window.bookFile=async(id,name,b64)=>{try{await bookFromFile(new File([b64blob(b64,'application/octet-stream')],name),id)}catch(e){libMsg(e&&e.message?e.message:'Could not read '+name);window.bookFail(id)}};
+function pagify(t){const P=String(t).split('\n').map(x=>x.trim()).filter(Boolean),out=[];let cur='';for(const p of P){if(cur&&cur.length+p.length>2800){out.push(cur);cur=''}cur+=(cur?'\n':'')+p}if(cur)out.push(cur);return out}
+async function bookFromFile(f,id){
+  id=id||'j'+Date.now()+Math.random().toString(36).slice(2,5);const nm=f.name||'book',ext=(nm.split('.').pop()||'').toLowerCase();let text='';
+  if(ext==='txt'||ext==='md'||f.type==='text/plain')text=await f.text();
+  else if(ext==='docx'||ext==='odt'){
+    if(typeof DecompressionStream==='undefined')throw new Error('Word files need a newer “Android System WebView”. Update it in the Play Store, or use a PDF.');
+    const z=await unzip(await f.arrayBuffer()),key=z['word/document.xml']?'word/document.xml':z['content.xml']?'content.xml':'';
+    if(!key)throw new Error('Could not read '+nm);text=xmlText(new TextDecoder().decode(await inflate(z[key])))}
+  else if(ext==='pdf')throw new Error('PDF books work in the Android app only.');
+  else throw new Error(nm+' isn’t supported (use PDF, DOCX or TXT).');
+  const pages=pagify(text);if(!pages.length)throw new Error('Nothing readable found in '+nm+'.');
+  window.bookInfo(id,nm,pages.length);
+  for(let i=0;i<pages.length;i++){await addBookPage(id,i,pages[i]);if(i%5===4)await sleep(0)}
+  window.bookDone(id)}
+$('#b_add').onclick=()=>{if(window.Android&&window.Android.pickBook)window.Android.pickBook();else $('#bf').click()};
+$('#bf').onchange=async e=>{const l=[...e.target.files];e.target.value='';for(const f of l){try{await bookFromFile(f)}catch(x){libMsg(x&&x.message?x.message:'Could not read '+f.name)}}};
+// ---- reading photos on the phone (no internet) ----
+window.ocrDone=(id,t)=>{const p=OFF.pend[id];if(p){delete OFF.pend[id];p(String(t||''))}};
+function ocr(b64){return new Promise((res,rej)=>{
+  if(!(window.Android&&window.Android.ocr))return rej(new Error('Reading photos offline works in the Android app only. Type the questions instead.'));
+  const id='o'+(++OFF.seq);OFF.pend[id]=res;
+  try{window.Android.ocr(id,b64)}catch(e){delete OFF.pend[id];return rej(e)}
+  setTimeout(()=>{if(OFF.pend[id]){delete OFF.pend[id];res('')}},120000)})}
+// ---- the questions you give the offline side ----
+const oMsg=t=>{$('#o_res').hidden=false;$('#o_out').textContent=t;OFF.last=t;$('#o_via').textContent=''};
+function oDraw(){const t=$('#o_th');t.innerHTML='';
+  OFF.files.forEach(x=>{const d=el('div',x.kind==='img'?'tb':'chip');
+    if(x.kind==='img'){const im=el('img');im.src=x.u;im.alt='Photo';im.onclick=async()=>{const b=await crop(x.f);if(b){URL.revokeObjectURL(x.u);x.f=b;x.u=URL.createObjectURL(b);oDraw()}};d.append(im)}
+    else d.append(el('b',0,(x.name.split('.').pop()||'').slice(0,4).toUpperCase()),el('span',0,x.name),el('small',0,x.text.length+' characters'));
+    const r=el('button','rm','✕');r.setAttribute('aria-label','Remove');r.onclick=()=>{if(x.u)URL.revokeObjectURL(x.u);OFF.files=OFF.files.filter(y=>y!==x);oDraw()};d.append(r);t.append(d)});
+  const ni=OFF.files.filter(x=>x.kind==='img').length,nf=OFF.files.length-ni;
+  $('#o_cnt').textContent=OFF.files.length?(ni?ni+' photo'+(ni===1?'':'s'):'')+(ni&&nf?' · ':'')+(nf?nf+' file'+(nf===1?'':'s'):'')+(ni?' · tap a photo to crop':''):''}
+function oAddImg(f){if(OFF.files.filter(x=>x.kind==='img').length>=40){oMsg('Up to 40 photos at once.');return}OFF.files.push({kind:'img',f,u:URL.createObjectURL(f)});oDraw()}
+async function oPdf(f){
+  if(!(window.Android&&window.Android.open))throw new Error('PDF files work in the Android app only.');
+  const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(f)});
+  const n=window.Android.open(b64);if(!(n>0))throw new Error('Could not read '+f.name);
+  try{for(let i=0;i<Math.min(n,40);i++){const s=window.Android.page(i);if(s)oAddImg(b64blob(s,'image/jpeg'))}}finally{window.Android.close()}}
+async function oDocx(f){
+  if(typeof DecompressionStream==='undefined')throw new Error('Word files need a newer “Android System WebView”. Update it in the Play Store, or save the file as PDF.');
+  const z=await unzip(await f.arrayBuffer()),key=z['word/document.xml']?'word/document.xml':z['content.xml']?'content.xml':'';
+  if(!key)throw new Error('Could not read '+f.name);
+  const text=xmlText(new TextDecoder().decode(await inflate(z[key])));if(text)OFF.files.push({kind:'txt',name:f.name,text});
+  for(const k of Object.keys(z).filter(k=>/^(word\/media|Pictures)\/.+\.(png|jpe?g|webp|gif|bmp)$/i.test(k)).sort()){
+    const d=await inflate(z[k]);if(d.length<4000)continue;oAddImg(new Blob([d],{type:'image/'+k.match(/\.(\w+)$/)[1].toLowerCase().replace('jpg','jpeg')}))}
+  oDraw()}
+async function oAdd(list){
+  for(const f of list){const n=(f.name||'').toLowerCase(),t=f.type||'';
+    try{
+      if(f.size>15e6&&!t.startsWith('image/')){oMsg(f.name+' is over 15 MB.');continue}
+      if(t.startsWith('image/')||/\.(jpe?g|png|webp|gif|bmp)$/.test(n))oAddImg(f);
+      else if(t==='application/pdf'||/\.pdf$/.test(n))await oPdf(f);
+      else if(/\.(docx|odt)$/.test(n))await oDocx(f);
+      else if(/\.(txt|md)$/.test(n)||t==='text/plain'){OFF.files.push({kind:'txt',name:f.name,text:await f.text()});oDraw()}
+      else if(/\.doc$/.test(n))oMsg('Old .doc files can’t be read. Save as .docx or PDF and add it again.');
+      else oMsg((f.name||'This file')+' isn’t supported (use photos, PDF, DOCX or TXT).');
+    }catch(e){oMsg(e&&e.message?e.message:'Could not read '+f.name)}}}
+$('#of').onchange=e=>{const l=[...e.target.files];e.target.value='';oAdd(l)};
+$('#ofc').onchange=async e=>{const l=[...e.target.files];e.target.value='';for(const f of l){const b=await crop(f);if(b)oAddImg(b)}};
+$('#o_clr').onclick=()=>{OFF.files.forEach(x=>x.u&&URL.revokeObjectURL(x.u));OFF.files=[];$('#o_text').value='';oDraw();$('#o_res').hidden=true};
+// ---- answering ----
+async function oGo(){
+  if(OFF.running)return;
+  const typed=$('#o_text').value.trim(),files=OFF.files.slice();
+  if(!files.length&&!typed)return oMsg('Add photos or files, or type your questions above.');
+  if(!OFF.books.some(b=>BU(b)&&(b.done||0)>0))return oMsg('Add a book first (Books section above). Answers come from your book.');
+  OFF.running=true;$('#o_go').disabled=true;mark('off',true);const t0=Date.now();
+  try{
+    oMsg('Reading your questions…');
+    const imgs=files.filter(x=>x.kind==='img'),texts=[];
+    for(const x of imgs){texts.push(await ocr(await shrink(x.f)));oMsg('Reading photos… '+texts.length+' of '+imgs.length)}
+    const srcs=[],notes=[];
+    imgs.forEach((x,i)=>{if(texts[i].trim())srcs.push(texts[i]);else notes.push('Photo '+(i+1)+': no readable text found.')});
+    files.filter(x=>x.kind==='txt').forEach(x=>srcs.push(x.text));
+    if(typed)srcs.push(typed);
+    const qs=srcs.flatMap(splitQs);
+    if(!qs.length)return oMsg((notes.concat(['No questions found in that text.'])).join('\n'));
+    await OFF.ready;
+    const r=answerAll(qs,OFF.idx),its=order(r.items),g=gaps(its);
+    if(r.low.length)notes.push('Not sure about: '+r.low.join(', ')+' (the book does not say it clearly — please check).');
+    if(r.miss.length)notes.push('Not found in your book: '+r.miss.join(', ')+' — try Online mode for these.');
+    if(g.length)notes.push('No question found for number'+(g.length>1?'s ':' ')+g.join(', ')+'.');
+    const o=$('#o_out');o.innerHTML='';OFF.last=plain(its);$('#o_res').hidden=false;
+    $('#o_via').textContent='offline · '+OFF.books.filter(BU).length+' book(s) · '+qs.length+' question'+(qs.length===1?'':'s')+' · '+((Date.now()-t0)/1000).toFixed(1)+' s';
+    its.forEach(x=>o.append(el('div','it',fmt({q:[x]}))));
+    if(notes.length)o.append(el('div','warn',notes.join('\n')));
+  }catch(e){oMsg(e&&e.message?e.message:'Something went wrong.')}
+  finally{OFF.running=false;$('#o_go').disabled=false;bookBusy()}}
+$('#o_go').onclick=oGo;
+$('#o_cp').onclick=()=>{const b=$('#o_cp');let ok=false;
+  try{if(window.Android&&window.Android.copy){window.Android.copy(OFF.last);ok=true}}catch(e){}
+  if(!ok){try{const t=document.createElement('textarea');t.value=OFF.last;t.style.cssText='position:fixed;opacity:0';document.body.append(t);t.select();ok=document.execCommand('copy');t.remove()}catch(e){}}
+  if(!ok&&navigator.clipboard)navigator.clipboard.writeText(OFF.last).catch(()=>{});
+  b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1200)};
+setTab(load('tab')==='off'?'off':'on');oDraw();libLoad();
+</script></body></html>

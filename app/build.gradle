@@ -1,0 +1,12 @@
+plugins { id 'com.android.application' }
+android {
+  namespace 'com.quickans'
+  compileSdk 34
+  defaultConfig {
+    applicationId 'com.quickans'; minSdk 21; targetSdk 34; versionCode 1; versionName '1.0'
+    ndk { abiFilters 'armeabi-v7a', 'arm64-v8a' }   // keeps the app smaller (all normal phones)
+  }
+}
+dependencies {
+  implementation 'com.google.mlkit:text-recognition:16.0.0'   // reads text in pictures on the phone, no internet needed
+}
